@@ -10,25 +10,25 @@ class SessionController {
       password: Yup.string().required(),
     })
 
-    const userEmailOrPasswordIncorrect = () => {
+    if (!(await schema.isValid(request.body)))
       return response
         .status(401)
-        .json({ error: 'Make sure your password or email are correct' })
-    }
-
-    if (!(await schema.isValid(request.body)))
-      return userEmailOrPasswordIncorrect()
-
+        .json({ error: 'Make sure your password or email are corect' })
     const { email, password } = request.body
 
     const user = await User.findOne({
       where: { email },
     })
 
-    if (!user) userEmailOrPasswordIncorrect()
+    if (!user)
+      return response
+        .status(409)
+        .json({ error: 'Make sure your password or email are corect' })
 
     if (!(await user.checkPassword(password)))
-      return userEmailOrPasswordIncorrect()
+      return response
+        .status(401)
+        .json({ error: 'Make sure your password or email are corect' })
 
     return response.json({
       id: user.id,
